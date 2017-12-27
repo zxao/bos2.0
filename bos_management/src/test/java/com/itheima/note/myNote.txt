@@ -1,0 +1,93 @@
+1.bos2.0项目的搭建
+
+2.maven：项目管理工具：管理jar包
+          本地仓库：
+          私服
+          中央仓库
+      在pom文件输入对应的jar包的坐标
+3.版本控制工具(VCS)：cvs,svm,git
+        第三方版本控制平台：码云，github;
+4.easyui框架的使用
+    打开easyui窗口
+    $('#standardWindow').window('open');
+    easy完成加载的json格式
+        total
+        rows
+        请求的参数
+                page
+                rows
+    使用struts的json完成easyui的分页显示
+    接收参数page、rows
+     public void setPage(int page) {
+            this.page = page;
+     }
+
+     public void setRows(int rows) {
+            this.rows = rows;
+     }
+
+     @Action(value = "courier_queryPage",results = {@Result(type = "json")})
+     public String courierQueryPage(){
+        //封装page和rows到pageable中
+        Pageable pageable = new PageRequest(0,20);
+        //调用courierService的findAll(pageable)
+        Page<Courier> pageData = courierService.queryPage(pageable);
+        //将pageDate序列化为json格式
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("total",pageData.getTotalElements());
+        map.put("rows",pageData.getContent());
+        //使用struts2的json工具，将要转换为json的对象压入valuestack的栈顶
+        ActionContext.getContext().getValueStack().push(map);
+        return SUCCESS;
+     }
+
+     排除要转化为json的字段
+     在对应的get方法上添加注解：@JSON(serialize = false)
+
+ =============================================
+ 回顾：
+        Spring Data JPA
+            Spring Data 框架整合了很多持久层的技术，可以简化持久层的开发，统一了持久层的实现方式
+
+            Spring Data JPA的使用方式
+                1.导入Jar包 pom文件 （版本统一）
+                2.在ApplicationContext中配置包扫描
+                3.定义接口，继承JpaRepository接口
+
+                JpaRepository接口中的方法：
+                    自带的方法：
+                            findAll()
+                            findOne()
+                            Page<T> findAll(pageable)
+                    自定义方法
+                        1.自定义查询：
+                            符合命名规则：
+                                    findBy属性名
+                            不符合命名规则：
+                                @query(value="hql")
+                                @query(value="sql",nativeQuery=true)
+                        2.自定义的增删改：
+                            @Query(value="hql")
+                            @Modifying
+                EasyUI DataGrid
+                    分页原理：
+                        1.当分页加载时，datagrid会向服务器端发送两个参数
+                            page:当前页码
+                            rows:每页显示的条数
+                        2.服务器收到参数后，查询数据
+                                1.构造Pageable对象，封装page与rows
+                                2.调用findAll(pageable),返回Page<T>
+                                3.序列化数据为指定json
+
+                        3.服务器返回指定json格式数据给客户端，datagrid会自定解析json
+                            固定格式：
+                            {
+                                "total":总记录数
+                                "rows":[]每页记录数
+                            }
+
+
+
+
+
+

@@ -30,7 +30,7 @@
 					pageList: [30,50,100],
 					pagination : true,
 					toolbar : toolbar,
-					url : "../../data/standard.json",
+					url : "../../standard_findPage",
 					idField : 'id',
 					columns : columns
 				});
@@ -42,14 +42,23 @@
 				text : '增加',
 				iconCls : 'icon-add',
 				handler : function(){
-					alert('增加');
+
+                    $('#standardWindow').window('open');
 				}
 			}, {
 				id : 'button-edit',
 				text : '修改',
 				iconCls : 'icon-edit',
 				handler : function(){
-					alert('修改');
+				    var rows = $("#grid").datagrid('getSelections');
+					if(rows.length==1){
+                        $("#standard_save").form('load',rows[0]);
+                        $('#standardWindow').window('open');
+					}else{
+					    $.messager.alert("警告","只能对一行数据进行修改","warning");
+					}
+
+
 				}
 			}];
 			
@@ -98,6 +107,21 @@
 				width : 120,
 				align : 'center'
 			} ] ];
+
+			$(function () {
+			    $("#save").click(function () {
+
+                   if($("#standard_save").form('validate')) {
+                       $("#standard_save").submit();
+					}else {
+
+                       $.messager.alert("警告","表单中还存在非法内容！","warning");
+				   }
+
+
+                });
+
+            });
 		</script>
 	</head>
 
@@ -115,7 +139,7 @@
 
 			<div region="center" style="overflow:auto;padding:5px;" border="false">
 				
-				<form>
+				<form action="../../standard_save" method="post" id="standard_save">
 					<table class="table-edit" width="80%" align="center">
 						<tr class="title">
 							<td colspan="2">收派标准信息

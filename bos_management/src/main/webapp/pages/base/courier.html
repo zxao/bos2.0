@@ -21,16 +21,55 @@
 			}
 			
 			function doEdit(){
-				alert("修改...");
+
+			    var rows = $("#grid").datagrid('getSelections');
+			    if(rows.length!=1){
+			        $.messager.alert("警告","只能对一行数据进行修改！","warning");
+				}else{
+                    $("#courierForm").form('load',rows[0]);
+                    $("#combobox").combobox('setValue',rows[0].standard.name);
+                    $('#addWindow').window("open");
+				}
+
 			}
 			
 			function doDelete(){
-				alert("删除...");
+                var rows = $("#grid").datagrid('getSelections');
+                if(rows.length==0){
+                    $.messager.alert("警告","您还没有选择要作废的行！","warning")
+				}else{
+                    var array = new Array();
+                    for(var i=0;i<rows.length;i++){
+                        array.push(rows[i].id);
+					}
+					var ids = array.join(",");
+
+					window.location.href="../../courier_deleteBatch?ids="+ids;
+				}
+
 			}
 			
 			function doRestore(){
-				alert("将取派员还原...");
+				var rows = $("#grid").datagrid('getSelections');
+				if(rows.length==0){
+				    $.messager.alert("警告","您还没有选择要还原的行！","warning");
+
+				}else{
+				    var array = new Array();
+				    for(var i=0;i<rows.length;i++) {
+				        array.push(rows[i].id);
+
+					}
+					var ids = array.join(",");
+				    window.location.href="../../courier_restore?ids="+ids;
+				}
 			}
+
+			function doSearch() {
+			    $("#searchWindow").window('open');
+
+            }
+
 			//工具栏
 			var toolbar = [ {
 				id : 'button-add',	
@@ -52,7 +91,12 @@
 				text : '还原',
 				iconCls : 'icon-save',
 				handler : doRestore
-			}];
+			},{
+                id : 'button-search',
+                text : '查询',
+                iconCls : 'icon-search',
+                handler : doSearch
+            }];
 			// 定义列
 			var columns = [ [ {
 				field : 'id',
@@ -109,7 +153,7 @@
 				width : 80,
 				align : 'center',
 				formatter : function(data,row, index){
-					if(data=="0"){
+					if(data==null){
 						return "正常使用"
 					}else{
 						return "已作废";
@@ -141,7 +185,7 @@
 					pageList: [30,50,100],
 					pagination : true,
 					toolbar : toolbar,
-					url : "../../data/courier.json",
+					url : "../../courier_queryPage",
 					idField : 'id',
 					columns : columns,
 					onDblClickRow : doDblClickRow
@@ -157,12 +201,55 @@
 			        height: 400,
 			        resizable:false
 			    });
+
+                $.fn.serializeJson=function(){
+                    var serializeObj={};
+                    var array=this.serializeArray();
+                    var str=this.serialize();
+                    $(array).each(function(){
+                        if(serializeObj[this.name]){
+                            if($.isArray(serializeObj[this.name])){
+                                serializeObj[this.name].push(this.value);
+                            }else{
+                                serializeObj[this.name]=[serializeObj[this.name],this.value];
+                            }
+                        }else{
+                            serializeObj[this.name]=this.value;
+                        }
+                    });
+                    return serializeObj;
+                };
+				
+				$("#searchBtn").click(function () {
+
+					//将表单参数转换为json格式数据
+					var params = $("#searchForm").serializeJson();
+					//将参数与对应的查询数据表格datagrid绑定
+					$("#grid").datagrid('load',params);
+					//关闭窗口
+					$("#searchWindow").window('close');
+
+                });
 				
 			});
 		
 			function doDblClickRow(){
 				alert("双击表格数据...");
 			}
+
+			$(function () {
+                $("#save").click(function () {
+
+                    if($("#courierForm").form('validate')){
+
+                        $("#courierForm").submit();
+                    }else{
+                        $.messager.alert("警告","表单中存在非法数据！","warning");
+                    }
+                });
+            });
+
+
 		</script>
 	</head>
 
@@ -178,10 +265,11 @@
 			</div>
 
 			<div region="center" style="overflow:auto;padding:5px;" border="false">
-				<form>
+				<form action="../../courier_save" method="post" id="courierForm">
 					<table class="table-edit" width="80%" align="center">
 						<tr class="title">
 							<td colspan="4">收派员信息</td>
+							<td><input type="hidden" name="id"></td>
 						</tr>
 						<tr>
 							<td>快递员工号</td>
@@ -220,7 +308,9 @@
 							</td>
 							<td>取派标准</td>
 							<td>
-								<input type="text" name="standard.id" class="easyui-validatebox" required="true"/>
+								<input id="combobox" type="text" name="standard.id" class="easyui-combobox"
+									   data-options="valueField:'id',textField:'name',url:'../../standard_findAll'"
+									   required="true"/>
 							</td>
 						</tr>
 						<tr>
