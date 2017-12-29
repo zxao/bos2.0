@@ -1,5 +1,8 @@
 package com.itheima.bos.domain.base;
 
+import org.apache.struts2.json.annotations.JSON;
+import org.springframework.data.annotation.Transient;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,15 +36,22 @@ public class Area {
 	@Column(name = "C_SHORTCODE")
 	private String shortcode; // 简码
 
+	@Transient
+	public String getAreaName() {
+		return province+" "+city+" "+district;
+	}
+
 	public Area() {
 	}
 
-	public Area(String id, String province, String city, String district, String postcode) {
+	public Area(String id, String province, String city, String district, String postcode, String citycode, String shortcode) {
 		this.id = id;
 		this.province = province;
 		this.city = city;
 		this.district = district;
 		this.postcode = postcode;
+		this.citycode = citycode;
+		this.shortcode = shortcode;
 	}
 
 	@OneToMany(mappedBy = "area")
@@ -102,7 +112,7 @@ public class Area {
 	public void setShortcode(String shortcode) {
 		this.shortcode = shortcode;
 	}
-
+	@JSON(serialize = false)
 	public Set<SubArea> getSubareas() {
 		return subareas;
 	}

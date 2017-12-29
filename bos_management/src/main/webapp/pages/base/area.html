@@ -22,21 +22,64 @@
 			}
 			
 			function doView(){
-				alert("修改...");
+				//获取选中的行
+				var rows = $("#grid").datagrid('getSelections');
+				//判断选中的行数
+				if(rows.length != 1) {
+				    //提示错误信息
+					$.messager.alert("警告","只能对一行数据进行修改！","warning");
+
+				}else{
+				    //加载选中的数据回显到表单
+					$("#areaForm").form('load',rows[0]);
+					//打开窗口
+                    $('#addWindow').window("open");
+
+				}
 			}
 			
 			function doDelete(){
-				alert("删除...");
+                var rows = $("#grid").datagrid('getSelections');
+                var array = new Array();
+                for (var i=0;i<rows.length;i++) {
+                    var id = rows[i].id;
+                    array.push(id);
+				}
+				var ids = array.join(',');
+                window.location.href="../../area_del?ids="+ids;
 			}
 
 			function doupload() {
                 $("#button-import").upload({
                     action : '../../area_batchImport',
+					onSelect : function () {//选中文件时触发的事件
+						//选中文件是关闭自动提交
+						this.autoSubmit=false;
+						//判断上传文件的格式（.xls或.xlsx）
+						//获取选中的文件名
+						var filename = this.filename();
+						//使用正则表达式判断文件选中文件名的后缀
+						var regex=/^.*\.(xls|xlsx)$/;
+						if(regex.test(filename)){
+						    //满足
+							this.submit();
+						}else{//不满足
+							$.messager.alert("警告","只能上传Excel文件","warning")
+
+						}
+						
+                    },
                     onComplete : function (response) {
-                        alert(response);
+                        $.messager.alert("消息",response,"info");
 
                     }
                 });
+            }
+
+
+            function doSearch() {
+
+				$("#searchWindow").window('open');
             }
 			
 			//工具栏
@@ -51,10 +94,15 @@
 				iconCls : 'icon-add',
 				handler : doAdd
 			}, {
-				id : 'button-delete',
-				text : '删除',
-				iconCls : 'icon-cancel',
-				handler : doDelete
+                id: 'button-delete',
+                text: '删除',
+                iconCls: 'icon-cancel',
+                handler: doDelete
+            } , {
+                id : 'button-search',
+                text : '查询',
+                iconCls : 'icon-search',
+                handler : doSearch
 			}, {
 				id : 'button-import',
 				text : '导入',
@@ -111,7 +159,7 @@
 					pageList: [30,50,100],
 					pagination : true,
 					toolbar : toolbar,
-					url : "../../data/area.json",
+					url : "../../area_pageQuery",
 					idField : 'id',
 					columns : columns,
 					onDblClickRow : doDblClickRow
@@ -128,7 +176,42 @@
 			        resizable:false
 			    });
 
+                //导入表单数据转换json的方法
+                $.fn.serializeJson=function(){
+                    var serializeObj={};
+                    var array=this.serializeArray();
+                    var str=this.serialize();
+                    $(array).each(function(){
+                        if(serializeObj[this.name]){
+                            if($.isArray(serializeObj[this.name])){
+                                serializeObj[this.name].push(this.value);
+                            }else{
+                                serializeObj[this.name]=[serializeObj[this.name],this.value];
+                            }
+                        }else{
+                            serializeObj[this.name]=this.value;
+                        }
+                    });
+                    return serializeObj;
+                };
 
+                //添加searchBtn的监听事件
+				$("#searchBtn").click(function () {
+					//将表单中的数据转换为json格式的数据
+					var params = $("#searchForm").serializeJson();
+					//将参数与datagrid绑定
+					$("#grid").datagrid('load',params);
+					//关闭窗口
+					$("#searchWindow").window('close');
+                });
+
+				$("#save").click(function () {
+					if($("#areaForm").form('validate')){
+					    $("#areaForm").submit();
+					}else{
+					    $.messager.alert("警告","页面中存在非法的输入项","warning");
+					}
+                });
 				
 			});
 		
@@ -150,7 +233,7 @@
 			</div>
 
 			<div region="center" style="overflow:auto;padding:5px;" border="false">
-				<form>
+				<form action="../../area_save" method="post" id="areaForm">
 					<table class="table-edit" width="80%" align="center">
 						<tr class="title">
 							<td colspan="2">区域信息</td>

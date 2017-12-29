@@ -5,6 +5,7 @@
 		<title>管理分区</title>
 		<!-- 导入jquery核心类库 -->
 		<script type="text/javascript" src="../../js/jquery-1.8.3.js"></script>
+		<script type="text/javascript" src="../../js/ocupload/jquery.ocupload-1.1.2.js"></script>
 		<!-- 导入easyui类库 -->
 		<link rel="stylesheet" type="text/css" href="../../js/easyui/themes/default/easyui.css">
 		<link rel="stylesheet" type="text/css" href="../../js/easyui/themes/icon.css">
@@ -20,11 +21,30 @@
 			}
 			
 			function doEdit(){
-				alert("修改...");
+				//获取选中的数据
+				var rows = $("#grid").datagrid('getSelections');
+				//判断选中行数
+				if(rows.length!=1) {
+				    $.messager.alert("警告","只能对一行数据进行修改！","warning")
+				}else{
+				    //回显数据
+					$("#subAreaForm").form('load',rows[0]);
+					$("#comboboxArea").combobox('setValue',rows[0].area.id);
+                    $("#comboboxFixedArea").combobox('setValue',rows[0].fixedArea.id);
+					//打开窗口
+                    $('#addWindow').window("open");
+
+				}
 			}
 			
 			function doDelete(){
-				alert("删除...");
+                var rows = $("#grid").datagrid('getSelections');
+                var array = new Array();
+                for(var i=0;i<rows.length;i++) {
+                    array.push(rows[i].id);
+				}
+                var ids = array.join(",");
+                window.location.href="../../subArea_batchDel?ids="+ids;
 			}
 			
 			function doSearch(){
@@ -32,14 +52,52 @@
 			}
 			
 			function doExport(){
-				alert("导出");
+				window.location.href="../../subArea_export";
 			}
 			
 			function doImport(){
-				alert("导入");
+				$("#button-import").upload({
+					action : '../../subArea_import',
+					onSelect: function () {
+						//关闭自动提交
+						this.autoSubmit=false;
+						var filename = this.filename();
+						//判断文件名是否以.xls或者.xlsx
+						var regex=/^.*\.(xls|xlsx)$/;
+						if(regex.test(filename)){
+						    this.submit();
+						}else{
+						    $.messager.alert("警告","只能上传Excel文件！","warning")
+						}
+
+                    },
+					onComplete : function (response) {
+						$.messager.alert("消息",response,"info");
+                    }
+				});
 			}
-			
-			//工具栏
+
+            //导入表单数据转换json的方法
+            $.fn.serializeJson=function(){
+                var serializeObj={};
+                var array=this.serializeArray();
+                var str=this.serialize();
+                $(array).each(function(){
+                    if(serializeObj[this.name]){
+                        if($.isArray(serializeObj[this.name])){
+                            serializeObj[this.name].push(this.value);
+                        }else{
+                            serializeObj[this.name]=[serializeObj[this.name],this.value];
+                        }
+                    }else{
+                        serializeObj[this.name]=this.value;
+                    }
+                });
+                return serializeObj;
+            };
+
+
+            //工具栏
 			var toolbar = [ {
 				id : 'button-search',	
 				text : '查询',
@@ -77,7 +135,7 @@
 				checkbox : true,
 			}, {
 				field : 'showid',
-				title : '分拣编号',
+				title : '分区编号',
 				width : 120,
 				align : 'center',
 				formatter : function(data,row ,index){
@@ -122,12 +180,12 @@
 				width : 120,
 				align : 'center'
 			}, {
-				field : 'startnum',
+				field : 'startNum',
 				title : '起始号',
 				width : 100,
 				align : 'center'
 			}, {
-				field : 'endnum',
+				field : 'endNum',
 				title : '终止号',
 				width : 100,
 				align : 'center'
@@ -157,7 +215,7 @@
 					pageList: [30,50,100],
 					pagination : true,
 					toolbar : toolbar,
-					url : "../../data/sub_area.json",
+					url : "../../subArea_queryPage",
 					idField : 'id',
 					columns : columns,
 					onDblClickRow : doDblClickRow
@@ -185,7 +243,20 @@
 			        resizable:false
 			    });
 				$("#btn").click(function(){
-					alert("执行查询...");
+                    //将表单数据转换为json数据
+                    var params = $("#subAreaSearchForm").serializeJson();
+                    //将params与datagrid绑定
+                    $("#grid").datagrid('load',params);
+                    //关闭窗口
+                    $("#searchWindow").window('close');
+				});
+
+				$("#save").click(function(){
+				    if($("#subAreaForm").form('validate')){
+                        $("#subAreaForm").submit();
+					}else{
+				        $.messager.alert("警告","表单中存在非法项！","warning");
+					}
 				});
 				
 			});
@@ -209,13 +280,13 @@
 			</div>
 
 			<div style="overflow:auto;padding:5px;" border="false">
-				<form>
+				<form action="../../subArea_Save" method="post" id="subAreaForm">
 					<table class="table-edit" width="80%" align="center">
 						<tr class="title">
 							<td colspan="2">分区信息</td>
 						</tr>
 						<tr>
-							<td>分拣编码</td>
+							<td>分区编码</td>
 							<td>
 								<input type="text" name="id" class="easyui-validatebox" required="true" />
 							</td>
@@ -223,13 +294,13 @@
 						<tr>
 							<td>选择区域</td>
 							<td>
-								<input class="easyui-combobox" name="area.id" data-options="valueField:'id',textField:'name',url:'../../data/area.json'" />
+								<input id="comboboxArea" class="easyui-combobox" name="area.id" data-options="valueField:'id',textField:'areaName',url:'../../area_findAll'" />
 							</td>
 						</tr>
 						<tr>
 							<td>选择定区</td>
 							<td>
-								<input class="easyui-combobox" name="fixedArea.id" data-options="valueField:'id',textField:'name',url:'../../data/fixedArea.json'" />
+								<input id="comboboxFixedArea" class="easyui-combobox" name="fixedArea.id" data-options="valueField:'id',textField:'fixedAreaName',url:'../../fixedArea_findAll'" />
 							</td>
 						</tr>
 						<tr>
@@ -241,13 +312,13 @@
 						<tr>
 							<td>起始号</td>
 							<td>
-								<input type="text" name="startnum" class="easyui-validatebox" required="true" />
+								<input type="text" name="startNum" class="easyui-validatebox" required="true" />
 							</td>
 						</tr>
 						<tr>
 							<td>终止号</td>
 							<td>
-								<input type="text" name="endnum" class="easyui-validatebox" required="true" />
+								<input type="text" name="endNum" class="easyui-validatebox" required="true" />
 							</td>
 						</tr>
 						<tr>
@@ -273,7 +344,7 @@
 		<!-- 查询分区 -->
 		<div class="easyui-window" title="查询分区窗口" id="searchWindow" collapsible="false" minimizable="false" maximizable="false" style="top:20px;left:200px">
 			<div style="overflow:auto;padding:5px;" border="false">
-				<form>
+				<form id="subAreaSearchForm">
 					<table class="table-edit" width="80%" align="center">
 						<tr class="title">
 							<td colspan="2">查询条件</td>
@@ -281,25 +352,25 @@
 						<tr>
 							<td>省</td>
 							<td>
-								<input type="text" name="province" class="easyui-validatebox" required="true" />
+								<input type="text" name="province" class="easyui-combobox" data-options="valueField:'province',textField:'province',url:'../../area_findAll'" />
 							</td>
 						</tr>
 						<tr>
 							<td>市</td>
 							<td>
-								<input type="text" name="city" class="easyui-validatebox" required="true" />
+								<input type="text" name="city" class="easyui-combobox" data-options="valueField:'city',textField:'city',url:'../../area_findAll'" />
 							</td>
 						</tr>
 						<tr>
 							<td>区（县）</td>
 							<td>
-								<input type="text" name="district" class="easyui-validatebox" required="true" />
+								<input type="text" name="district" class="easyui-combobox" data-options="valueField:'district',textField:'district',url:'../../area_findAll'" />
 							</td>
 						</tr>
 						<tr>
 							<td>定区编码</td>
 							<td>
-								<input type="text" name="fixedArea.id" class="easyui-validatebox" required="true" />
+								<input type="text" name="fixedArea.id" class="easyui-combobox" data-options="valueField:'id',textField:'id',url:'../../fixedArea_findAll'"/>
 							</td>
 						</tr>
 						<tr>

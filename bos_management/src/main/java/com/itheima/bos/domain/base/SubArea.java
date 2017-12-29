@@ -35,6 +35,20 @@ public class SubArea {
 	@JoinColumn(name = "C_FIXEDAREA_ID")
 	private FixedArea fixedArea; // 定区
 
+	public SubArea() {
+	}
+
+	public SubArea(String id, String startNum, String endNum, Character single, String keyWords, String assistKeyWords, Area area, FixedArea fixedArea) {
+		this.id = id;
+		this.startNum = startNum;
+		this.endNum = endNum;
+		this.single = single;
+		this.keyWords = keyWords;
+		this.assistKeyWords = assistKeyWords;
+		this.area = area;
+		this.fixedArea = fixedArea;
+	}
+
 	public String getId() {
 		return id;
 	}
