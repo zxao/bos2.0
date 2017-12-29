@@ -8,6 +8,8 @@
   <description>bos v2.0综合平台的公共父项目，用于统一依赖管理</description>
   <modules>
 	  <module>../bos_management</module>
+	  <module>../crm_management</module>
+	  <module>../crm_domain</module>
   </modules>
  <properties>
 		<spring.version>4.1.7.RELEASE</spring.version>
