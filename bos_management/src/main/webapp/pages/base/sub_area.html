@@ -29,8 +29,26 @@
 				}else{
 				    //回显数据
 					$("#subAreaForm").form('load',rows[0]);
-					$("#comboboxArea").combobox('setValue',rows[0].area.id);
+					$("#comboboxProvince").combobox('setValue',rows[0].area.province);
+                    $("#comboboxCity").combobox('setValue',rows[0].area.city);
+                    $("#comboboxDistrict").combobox('setValue',rows[0].area.district);
                     $("#comboboxFixedArea").combobox('setValue',rows[0].fixedArea.id);
+//                    var children = $("#singleCombox").children();
+//                    if(rows[0].single==0){//是双号
+//                        for (var i=0;i<children.length;i++){
+//                            if(children[i].text=="双号"){
+//                                children[i].attr("selected","selected");
+//							}
+//						}
+//					}else if(row[0].single==1){//是单号
+//                        for (var i=0;i<children.length;i++){
+//                            if(children[i].text=="单号"){
+//                                children[i].attr("selected","selected");
+//                            }
+//                        }
+//					}else {//没有值
+//
+//					}
 					//打开窗口
                     $('#addWindow').window("open");
 
@@ -122,7 +140,7 @@
 				id : 'button-import',
 				text : '导入',
 				iconCls : 'icon-redo',
-				handler : doImport
+				//handler : doImport
 			},{
 				id : 'button-export',
 				text : '导出',
@@ -193,7 +211,19 @@
 				field : 'single',
 				title : '单双号',
 				width : 100,
-				align : 'center'
+				align : 'center',
+                formatter : function(data,row ,index){
+                    if(data == 0 ){
+                        return "双号";
+                    }else if(data==1){
+                        return "单号" ;
+					}else{
+                        return "";
+					}
+
+
+
+                }
 			} , {
 				field : 'assistKeyWords',
 				title : '辅助关键字',
@@ -264,6 +294,21 @@
 			function doDblClickRow(){
 				alert("双击表格数据...");
 			}
+			var array2 = "";
+			function findCityByProvince(comboPro) {
+			    var url='../../area_findCity?province='+comboPro.province;
+			    $("#comboboxCity").combobox('reload',url);
+                array2 = new Array();
+				array2.push(comboPro.province);
+            }
+
+            function findDistrictByProvinceAndCity(comboPro) {
+			    array2.push(comboPro.city);
+			    var params = array2.join(",");
+				var url = "../../area_findDistrictByProvinceAndCity?params="+params;
+				$("#comboboxDistrict").combobox('reload',url);
+            }
+
 		</script>
 	</head>
 
@@ -288,13 +333,30 @@
 						<tr>
 							<td>分区编码</td>
 							<td>
-								<input type="text" name="id" class="easyui-validatebox" required="true" />
+								<input type="text" name="id" class="easyui-validatebox" required="true"/>
 							</td>
 						</tr>
 						<tr>
 							<td>选择区域</td>
 							<td>
-								<input id="comboboxArea" class="easyui-combobox" name="area.id" data-options="valueField:'id',textField:'areaName',url:'../../area_findAll'" />
+								<!--<input id="comboboxArea" class="easyui-combobox" name="area.id" data-options="valueField:'id',textField:'areaName',url:'../../area_findAll'" />-->
+								<input id="comboboxProvince" class="easyui-combobox" name="area.id" data-options="width:'100',
+								value:'--请选择省份--',
+								valueField:'province',
+								textField:'province',
+								url:'../../area_findProvince',
+								onSelect:findCityByProvince
+								">
+								<input id="comboboxCity" class="easyui-combobox" name="area.id" data-options="width:'100',
+								value:'--请选择城市--',
+								valueField:'city',
+								textField:'city',
+								url:'',
+								onSelect:findDistrictByProvinceAndCity
+								">
+								<input id="comboboxDistrict" class="easyui-combobox" name="area.id" data-options="width:'100',value:'--请选择区域--',valueField:'district',textField:'district',url:''">
+
+
 							</td>
 						</tr>
 						<tr>
@@ -324,10 +386,10 @@
 						<tr>
 							<td>单双号</td>
 							<td>
-								<select class="easyui-combobox" name="single" style="width:150px;">
-									<option value="0">单双号</option>
-									<option value="1">单号</option>
-									<option value="2">双号</option>
+								<select id="singleCombox" class="easyui-combobox" name="single" style="width:150px;">
+									<option value="0" selected="">单双号</option>
+									<option value="1" selected="">单号</option>
+									<option value="2" selected="">双号</option>
 								</select>
 							</td>
 						</tr>

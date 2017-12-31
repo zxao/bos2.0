@@ -8,6 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface IAreaRepository extends JpaRepository<Area,String>,JpaSpecificationExecutor<Area> {
-//    @Query(value = "select DISTINCT C_CITY FROM T_AREA",nativeQuery = true)
-//    List<Area> queryByCity();
+    @Query("select distinct province from Area")
+    public List<String> areaFindProvince();
+    @Query("select distinct city from Area where province=?")
+    List<String> areaFindCity(String province);
+    @Query("select distinct district from Area where province=? and city=?")
+    List<String> areaFindDistrictByProvinceAndCity(String province, String city);
 }

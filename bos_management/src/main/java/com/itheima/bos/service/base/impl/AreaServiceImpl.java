@@ -100,8 +100,19 @@ public class AreaServiceImpl implements IAreaService{
     }
 
     @Override
-    public List<Area> areaQueryByCity() {
-        return null;
+    public List<String> areaFindProvince() {
+        return areaRepository.areaFindProvince();
     }
+
+    @Override
+    public List<String> areaFindCity(String province) {
+        return areaRepository.areaFindCity(province);
+    }
+
+    @Override
+    public List<String> areaFindDistrictByProvinceAndCity(String province, String city) {
+        return areaRepository.areaFindDistrictByProvinceAndCity(province,city);
+    }
+
 
 }

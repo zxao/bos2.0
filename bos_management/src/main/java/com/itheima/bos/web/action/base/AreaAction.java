@@ -6,8 +6,9 @@ import com.itheima.bos.utils.PinYin4jUtils;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 import com.opensymphony.xwork2.ModelDriven;
+
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -16,21 +17,18 @@ import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
+
 import org.springframework.stereotype.Controller;
 
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 @ParentPackage("json-default")
@@ -198,9 +196,69 @@ public class AreaAction extends ActionSupport implements ModelDriven<Area> {
         return SUCCESS;
     }
 
-    @Action(value = "area_queryByCity",results = {@Result(type = "json")})
-    public String areaQueryByCity() {
-        List<Area> areaList = areaService.areaQueryByCity();
+    /**
+     * 查询省
+     * @return
+     */
+    @Action(value = "area_findProvince",results = {@Result(type = "json")})
+    public String areaFindProvince() {
+        List<String> provinceList = areaService.areaFindProvince();
+        List<Area> areaList = new ArrayList<Area>();
+        for (String province : provinceList){
+            Area area2 = new Area();
+            area2.setProvince(province);
+            areaList.add(area2);
+        }
+        ActionContext.getContext().getValueStack().push(areaList);
+        return SUCCESS;
+    }
+
+    @Action(value = "area_findCity",results = {@Result(type = "json")})
+    public String areaFindCity() {
+        //get方式处理中文乱码
+        String province = area.getProvince();
+        try {
+            province = new String(province.getBytes("ISO-8859-1"), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        List<String> cityList = areaService.areaFindCity(province);
+        List<Area> areaList = new ArrayList<Area>();
+        for (String city : cityList){
+            Area area2 = new Area();
+            area2.setCity(city);
+            areaList.add(area2);
+        }
+        ActionContext.getContext().getValueStack().push(areaList);
+        return SUCCESS;
+    }
+
+    private String params;
+
+    public void setParams(String params) {
+        this.params = params;
+    }
+
+    @Action(value = "area_findDistrictByProvinceAndCity",results = {@Result(type = "json")})
+    public String areaFindDistrictByProvinceAndCity() {
+        //get方式处理中文乱码
+        try {
+            params = new String(params.getBytes("ISO-8859-1"), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        String[] split = params.split(",");
+        String province = split[0];
+        String city = split[split.length-1];
+
+        List<String> districtList = areaService.areaFindDistrictByProvinceAndCity(province,city);
+        List<Area> areaList = new ArrayList<Area>();
+        for (String district : districtList){
+            Area area2 = new Area();
+            area2.setDistrict(district);
+            areaList.add(area2);
+        }
         ActionContext.getContext().getValueStack().push(areaList);
         return SUCCESS;
     }

@@ -39,5 +39,24 @@ public interface IAreaService {
      */
     List<Area> areaFindAll();
 
-    List<Area> areaQueryByCity();
+
+    /**
+     * 查询区域省
+     * @return
+     */
+    List<String> areaFindProvince();
+
+    /**
+     * 查询城市
+     * @return
+     */
+    List<String> areaFindCity(String province);
+
+    /**
+     * 查询区域
+     * @param province
+     * @param city
+     * @return
+     */
+    List<String> areaFindDistrictByProvinceAndCity(String province, String city);
 }

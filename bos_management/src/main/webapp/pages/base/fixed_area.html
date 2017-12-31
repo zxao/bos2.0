@@ -32,8 +32,42 @@
 			}
 			
 			function doAssociations(){
-				$('#customerWindow').window('open');
+                var rows = $("#grid").datagrid('getSelections');
+                if(rows.length==1){
+                    // 只选择了一个定区
+                    // 弹出定区关联快递员 窗口
+                    $("#customerWindow").window('open');
+					//给customerFixedAreaId赋值
+					$("#customerFixedAreaId").val(rows[0].id)
+                    $.post("../../fixedArea_findNoassociationCustomers",function (data) {
+						$(data).each(function(){
+						    var option="<option value='"+this.id+"'>"+this.username+"("+this.company+")</option>"
+							$("#noassociationSelect").append($(option));
+						});
+                    },"json");
+
+                    $.post("../../fixedArea_findAssociationCustomers",{"id":rows[0].id},function (data) {
+                        $(data).each(function(){
+                            var option="<option value='"+this.id+"'>"+this.username+"("+this.company+")</option>"
+                            $("#associationSelect").append($(option));
+                        });
+                    },"json");
+                }else{
+                    // 没有选中定区，或者选择 了多个定区
+                    $.messager.alert("警告","关联客户,只能（必须）选择一个定区","warning");
+                }
+
 			}
+			
+			$(function () {
+				$("#toRight").click(function () {
+					$("#associationSelect").append($("#noassociationSelect option:selected"));
+                });
+
+                $("#toLeft").click(function () {
+                    $("#noassociationSelect").append($("#associationSelect option:selected"));
+                });
+            });
 			
 			//工具栏
 			var toolbar = [ {
@@ -452,7 +486,7 @@
 		</div>
 
 		<!-- 关联客户窗口 -->
-		<div class="easyui-window" title="关联客户窗口" id="customerWindow" collapsible="false" closed="true" minimizable="false" maximizable="false" style="top:20px;left:200px;width: 600px;height: 300px;">
+		<div class="easyui-window" title="关联客户窗口" id="customerWindow" modal="true" collapsible="false" closed="true" minimizable="false" maximizable="false" style="top:20px;left:200px;width: 600px;height: 300px;">
 			<div style="overflow:auto;padding:5px;" border="false">
 				<form id="customerForm" action="../../decidedzone_assigncustomerstodecidedzone.action" method="post">
 					<table class="table-edit" width="80%" align="center">
