@@ -36,17 +36,26 @@
                 if(rows.length==1){
                     // 只选择了一个定区
                     // 弹出定区关联快递员 窗口
-                    $("#customerWindow").window('open');
+					$.messager.progress({
+						title:"正在加载，请稍后！",
+						interval:500
+
+					});
+
 					//给customerFixedAreaId赋值
 					$("#customerFixedAreaId").val(rows[0].id)
                     $.post("../../fixedArea_findNoassociationCustomers",function (data) {
+                        $("#noassociationSelect").empty();
 						$(data).each(function(){
 						    var option="<option value='"+this.id+"'>"+this.username+"("+this.company+")</option>"
 							$("#noassociationSelect").append($(option));
 						});
+                        $.messager.progress('close');
+                        $("#customerWindow").window('open');
                     },"json");
 
                     $.post("../../fixedArea_findAssociationCustomers",{"id":rows[0].id},function (data) {
+                        $("#associationSelect").empty();
                         $(data).each(function(){
                             var option="<option value='"+this.id+"'>"+this.username+"("+this.company+")</option>"
                             $("#associationSelect").append($(option));
@@ -67,6 +76,13 @@
                 $("#toLeft").click(function () {
                     $("#noassociationSelect").append($("#associationSelect option:selected"));
                 });
+
+                $("#associationBtn").click(function(){
+                    //alert("zhangxiao");
+                    $("#associationSelect option").attr("selected","selected");
+					$("#customerForm").submit();
+
+				});
             });
 			
 			//工具栏
@@ -488,7 +504,7 @@
 		<!-- 关联客户窗口 -->
 		<div class="easyui-window" title="关联客户窗口" id="customerWindow" modal="true" collapsible="false" closed="true" minimizable="false" maximizable="false" style="top:20px;left:200px;width: 600px;height: 300px;">
 			<div style="overflow:auto;padding:5px;" border="false">
-				<form id="customerForm" action="../../decidedzone_assigncustomerstodecidedzone.action" method="post">
+				<form id="customerForm" action="../../fixedArea_assigncustomerstodecidedzone.action" method="post">
 					<table class="table-edit" width="80%" align="center">
 						<tr class="title">
 							<td colspan="3">关联客户</td>

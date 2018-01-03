@@ -5,6 +5,7 @@ import com.itheima.bos.domain.base.FixedArea;
 import com.itheima.bos.service.base.IFixedAreaService;
 import com.itheima.bos.utils.BaseAction;
 import com.opensymphony.xwork2.ActionContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.client.WebClient;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
 
@@ -89,6 +91,20 @@ public class fixedAreaAction extends BaseAction<FixedArea> {
         Collection<? extends Customer> customers = WebClient.create("http://localhost:9001/crm_management/services/customerService/hasAssocationCustomers/" + model.getId()).accept(MediaType.APPLICATION_JSON_TYPE).type(MediaType.APPLICATION_JSON_TYPE).getCollection(Customer.class);
 
         ActionContext.getContext().getValueStack().push(customers);
+        return SUCCESS;
+    }
+
+    private String[] customerIds;
+
+    public void setCustomerIds(String[] customerIds) {
+        this.customerIds = customerIds;
+    }
+
+    @Action(value = "fixedArea_assigncustomerstodecidedzone",results = {@Result(type = "redirect",location = "./pages/base/fixed_area.html")})
+    public String assigncustomerstodecidedzone() {
+
+        String customerIdStr = StringUtils.join(customerIds,",");
+        WebClient.create("http://localhost:9001/crm_management/services/customerService/associationCustomerToFixedArea?fixedAreaId=" + model.getId()+"&customerIdStr=" + customerIdStr).type(MediaType.APPLICATION_JSON_TYPE).put(null);
         return SUCCESS;
     }
 

@@ -33,5 +33,5 @@ public interface ICustomerService {
     @Path("/associationCustomerToFixedArea")
     @PUT
     @Consumes({"application/xml","application/json"})
-    public void associationCustomerToFixedArea(@QueryParam("customerIdStr") String customerIdStr,@QueryParam("fixedAreaId") String fixedAreaId);
+    public void associationCustomerToFixedArea(@QueryParam("fixedAreaId") String fixedAreaId,@QueryParam("customerIdStr") String customerIdStr);
 }

@@ -29,14 +29,22 @@ public class CustomerServiceImpl implements ICustomerService {
 
     //将客户与定区进行关联
     @Override
-    public void associationCustomerToFixedArea(String customerIdStr, String fixedAreaId) {
-        //遍历客户的id
-        String[] customerIds = customerIdStr.split(",");
-        for (String customerId : customerIds){
-            //将字符串转数字
-            Integer id = Integer.parseInt(customerId);
-            //调用customerRepository的方法
-            customerRepository.associationCustomerToFixedArea(id,fixedAreaId);
+    public void associationCustomerToFixedArea(String fixedAreaId, String customerIdStr) {
+
+        customerRepository.clearAssociationCustomerToFixedArea(fixedAreaId);
+        if(!customerIdStr.equals("null")){
+            //遍历客户的id
+            String[] customerIds = customerIdStr.split(",");
+
+                for (String customerId : customerIds){
+                    //将字符串转数字
+                    Integer id = Integer.parseInt(customerId);
+                    //调用customerRepository的方法
+                    customerRepository.associationCustomerToFixedArea(fixedAreaId,id);
+                }
+
+
         }
+
     }
 }
