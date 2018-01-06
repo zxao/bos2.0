@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="../js/angular.min.js"></script>
+</head>
+
+<body>
+
+    <div ng-app="myApp" ng-controller="myCtrl">
+        <table border="1" width="80%">
+            <tr>
+                <td>序号</td>
+                <td>商品编号</td>
+                <td>商品名称</td>
+                <td>价格</td>
+            </tr>
+            <tr ng-repeat="product in products">
+                <td>{{$index+1}}</td>
+                <td>{{product.id}}</td>
+                <td>{{product.name}}</td>
+                <td>{{product.price}}</td>
+            </tr>
+
+        </table>
+    </div>
+    <script>
+        //初始化模型
+        var myApp = angular.module("myApp",[]);
+        //定义模型的控制器，依赖注入
+        myApp.controller("myCtrl",["$scope",function ($scope) {
+            $scope.products=[
+                {
+                    id:'p001',
+                    name:'电脑',
+                    price:'4399'
+
+                },{
+                    id:'p002',
+                    name:'iphone',
+                    price:'7999'
+                }
+            ];
+        }]);
+
+
+    </script>
+
+</body>
+</html>

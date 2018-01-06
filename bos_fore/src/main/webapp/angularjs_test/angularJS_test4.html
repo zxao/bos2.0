@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试AngularJs路由</title>
+    <script type="text/javascript" src="../js/angular.min.js"></script>
+    <script type="text/javascript" src="../js/angular-route.min.js"></script>
+</head>
+
+<body ng-app="myApp">
+    <div>
+        <h1>HEAD</h1>
+        <a href="#/javaEE">javaEE</a>
+        <a href="#/Android">Android</a>
+        <a href="#/IOS">IOS</a>
+    </div>
+
+    <div ng-view>
+
+    </div>
+    <h1>FOOT</h1>
+    <script>
+        //定义app
+        var myApp=angular.module("myApp",["ngRoute"]);
+
+        myApp.config(["$routeProvider",function ($routeProvider) {
+            $routeProvider.when('/javaEE',{
+                templateUrl:'javaEE.html'
+            }).when('/Android',{
+                templateUrl:'android.html'
+            }).when('/IOS',{
+                templateUrl:'ios.html'
+            })
+        }]);
+    </script>
+
+</body>
+</html>

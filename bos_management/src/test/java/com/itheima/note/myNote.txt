@@ -86,6 +86,35 @@
                                 "rows":[]每页记录数
                             }
 
+AngularJS的使用
+ng-app="myApp" angularJS的入口
+ng-contraller="myCtrl"
+设置myApp
+var myApp=angular.module("myApp",[]);
+设置控制器
+myApp.contraller("myCtrl",["$scope",function($scope){
+
+}]);
+
+angularJs路由的使用
+导入路由依赖包
+<div ng-app="myApp">
+<div>
+<a href="#/javaEE">javaEE</a>
+</div>
+<div ng-view>
+</div>
+<div>
+
+定义myApp
+    var myApp=angular.module("myApp",["ngRoute"]);
+
+    配置模块路由
+    myApp.config=(["$routeProvider",function($routeProvider){
+        $routeProvider.when('/javaEE',{
+            templateUrl:javaEE.html
+        });
+    }]);
 
 
 

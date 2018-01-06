@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="../js/angular.min.js"></script>
+</head>
+
+<body>
+    <div ng-app="myApp" ng-controller="myContronller">
+        <div>
+            <input type="text" name="name" ng-model="name">
+            <input type="button" value="clear" name="clear" ng-click="clearValue()"></input>
+        </div>
+        <div>
+            hello,{{name}}
+        </div>
+    </div>
+    <script>
+        //舒适化myapp模块
+        var myApp = angular.module("myApp",[]);
+        //定义模型的控制器
+        //依赖注入，$scope作用域对象，操作当前作用域视图
+        myApp.controller("myContronller",["$scope",function ($scope) {
+            //对模型初始化赋值
+            $scope.name = "黑马程序员";
+            $scope.clearValue = function () {
+                $scope.name="";
+            }
+        }]);
+    </script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="../js/angular.min.js"></script>
+</head>
+
+<body ng-app>
+    <div>
+        <!--ng-model模型作用-->
+        <input type="text" name="name" ng-model="model">
+    </div>
+    <div>
+        <!--{{}} 相当于ng-bind 用于数据的显示-->
+        hello,{{model}}
+    </div>
+
+</body>
+</html>

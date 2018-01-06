@@ -34,4 +34,31 @@ public interface ICustomerService {
     @PUT
     @Consumes({"application/xml","application/json"})
     public void associationCustomerToFixedArea(@QueryParam("fixedAreaId") String fixedAreaId,@QueryParam("customerIdStr") String customerIdStr);
+
+    /**
+     * 客户信息的注册
+     * @param customer
+     */
+    @Path("/regist")
+    @POST
+    @Consumes({"application/xml","application/json"})
+    public void regist(Customer customer);
+
+    /**
+     * 根据电话号码查询客户
+     */
+    @Path("/customer/findByTelephone/{telephone}")
+    @GET
+    @Consumes({"application/xml","application/json"})
+    @Produces({"application/xml","application/json"})
+    public Customer findByTelephone(@PathParam("telephone") String telephone);
+
+    @Path("customer/updateTypeByTelephone/{telephone}")
+    @PUT
+    @Consumes({"application/xml","application/json"})
+    public void updataTypeByTelephone(@PathParam("telephone") String telephone);
+
+
+
+
 }
