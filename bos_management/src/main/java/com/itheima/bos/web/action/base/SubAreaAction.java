@@ -3,6 +3,7 @@ package com.itheima.bos.web.action.base;
 import com.itheima.bos.domain.base.Area;
 import com.itheima.bos.domain.base.FixedArea;
 import com.itheima.bos.domain.base.SubArea;
+import com.itheima.bos.service.base.IAreaService;
 import com.itheima.bos.service.base.ISubAreaService;
 import com.itheima.bos.utils.BaseAction;
 import com.opensymphony.xwork2.ActionContext;
@@ -39,6 +40,10 @@ public class SubAreaAction extends BaseAction<SubArea> {
 
     @Autowired
     private ISubAreaService subAreaService;
+
+    //注入areaService
+    @Autowired
+    private IAreaService areaService;
 
     private File file;
     private String fileFileName;
@@ -80,17 +85,21 @@ public class SubAreaAction extends BaseAction<SubArea> {
                 Row row = sheet.getRow(i);
                 //得到单元格
                 String id = row.getCell(0).getStringCellValue();
-                String fixedAreaId = row.getCell(1).getStringCellValue();
-                String areaId = row.getCell(2).getStringCellValue();
-                String keyWords = row.getCell(3).getStringCellValue();
-                String startNum = row.getCell(4).getStringCellValue();
-                String endNum = row.getCell(5).getStringCellValue();
-                Character single = row.getCell(6).getStringCellValue().toCharArray()[0];
-                String assistKeyWords = row.getCell(7).getStringCellValue();
-                Area area = new Area();
-                area.setId(areaId);
+                String province = row.getCell(1).getStringCellValue();
+                String city = row.getCell(2).getStringCellValue();
+                String district = row.getCell(3).getStringCellValue();
+                String keyWords = row.getCell(4).getStringCellValue();
+                String startNum = row.getCell(5).getStringCellValue();
+                String endNum = row.getCell(6).getStringCellValue();
+                Character single = row.getCell(7).getStringCellValue().toCharArray()[0];
+                String assistKeyWords = row.getCell(8).getStringCellValue();
+                String fixedAreaId = row.getCell(9).getStringCellValue();
+
                 FixedArea fixedArea = new FixedArea();
                 fixedArea.setId(fixedAreaId);
+                //根据省市区查询area
+                Area area = areaService.findByProvinceAndCityAndDistrict(province,city,district);
+
                 SubArea subArea = new SubArea(id,startNum,endNum,single,keyWords,assistKeyWords,area,fixedArea);
                 list.add(subArea);
             }

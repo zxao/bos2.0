@@ -11,8 +11,12 @@ import org.apache.struts2.convention.annotation.Result;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Controller;
 
+import javax.servlet.Servlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -45,10 +49,62 @@ public class ImageAction extends BaseAction<Object>{
         String savePath=null;
         try {
             //文件保存目录路径
-            savePath = ServletActionContext.getServletContext().getRealPath("/upload");
+            savePath = ServletActionContext.getServletContext().getRealPath("/upload/")+"/";
 
             //文件保存目录URL
             saveUrl= ServletActionContext.getRequest().getContextPath() + "/upload/";
+
+            //定义允许上传的文件扩展名
+            HashMap<String, String> extMap = new HashMap<String, String>();
+            extMap.put("image", "gif,jpg,jpeg,png,bmp");
+            extMap.put("flash", "swf,flv");
+            extMap.put("media", "swf,flv,mp3,wav,wma,wmv,mid,avi,mpg,asf,rm,rmvb");
+            extMap.put("file", "doc,docx,xls,xlsx,ppt,htm,html,txt,zip,rar,gz,bz2");
+
+            HttpServletResponse response = ServletActionContext.getResponse();
+            PrintWriter out = ServletActionContext.getResponse().getWriter();
+            HttpServletRequest request= ServletActionContext.getRequest();
+            //最大文件大小
+            long maxSize = 1000000;
+
+            response.setContentType("text/html; charset=UTF-8");
+
+
+            //检查目录
+            File uploadDir = new File(savePath);
+            if(!uploadDir.isDirectory()){
+                out.println("上传目录不存在。");
+                return INPUT;
+            }
+            //检查目录写权限
+            if(!uploadDir.canWrite()){
+                out.println("上传目录没有写权限。");
+                return INPUT;
+            }
+
+            String dirName = request.getParameter("dir");
+            if (dirName == null) {
+                dirName = "image";
+            }
+            if(!extMap.containsKey(dirName)){
+                out.println("目录名不正确。");
+                return INPUT;
+            }
+            //创建文件夹
+            savePath += dirName + "/";
+            saveUrl += dirName + "/";
+            File saveDirFile = new File(savePath);
+            if (!saveDirFile.exists()) {
+                saveDirFile.mkdirs();
+            }
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+//            String ymd = sdf.format(new Date());
+//            savePath += ymd + "/";
+//            saveUrl += ymd + "/";
+//            File dirFile = new File(savePath);
+//            if (!dirFile.exists()) {
+//                dirFile.mkdirs();
+//            }
 
             //生成随机的图片名
             UUID uuid = UUID.randomUUID();
@@ -100,7 +156,7 @@ public class ImageAction extends BaseAction<Object>{
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                return SUCCESS;
+                return INPUT;
             }
             rootPath += dirName + "/";
             rootUrl += dirName + "/";
@@ -127,7 +183,7 @@ public class ImageAction extends BaseAction<Object>{
         File currentPathFile = new File(currentPath);
         if(!currentPathFile.isDirectory()){
 
-            return SUCCESS;
+            return INPUT;
         }
         //遍历目录取的文件信息
         List<Hashtable> fileList = new ArrayList<Hashtable>();

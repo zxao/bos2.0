@@ -26,4 +26,9 @@ public interface ICustomerRepository extends JpaRepository<Customer,Integer>{
     @Query(value = "update Customer set type=1 where telephone=?")
     @Modifying
     void updataTypeByTelephone(String telephone);
+
+    Customer findByTelephoneAndPassword(String telephone, String password);
+
+    @Query(value = "select fixedAreaId from Customer where address=?")
+    String findfixedAreaIdByAddress(String address);
 }

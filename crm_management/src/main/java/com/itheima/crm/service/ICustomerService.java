@@ -47,17 +47,38 @@ public interface ICustomerService {
     /**
      * 根据电话号码查询客户
      */
-    @Path("/customer/findByTelephone/{telephone}")
+    @Path("customer/findByTelephone/{telephone}")
     @GET
     @Consumes({"application/xml","application/json"})
     @Produces({"application/xml","application/json"})
     public Customer findByTelephone(@PathParam("telephone") String telephone);
 
+    /**
+     * 根据手机号修改激活状态
+     * @param telephone
+     */
     @Path("customer/updateTypeByTelephone/{telephone}")
     @PUT
     @Consumes({"application/xml","application/json"})
     public void updataTypeByTelephone(@PathParam("telephone") String telephone);
 
+    /**
+     * 客户登录
+     * @param telephone
+     * @param password
+     * @return
+     */
+    @Path("/customer/customerLogin")
+    @GET
+    @Consumes({"application/xml","application/json"})
+    @Produces({"application/xml","application/json"})
+    public Customer customerLogin(@QueryParam("telephone") String telephone,@QueryParam("password") String password);
+
+    @Path("/customer/findFixedAreaIdByAddress")
+    @GET
+    @Consumes({"application/xml","application/json"})
+    @Produces({"application/xml","application/json"})
+    public String findfixedAreaIdByAddress(@QueryParam("address") String address);
 
 
 

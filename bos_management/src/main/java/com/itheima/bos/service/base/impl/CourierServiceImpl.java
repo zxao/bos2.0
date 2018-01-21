@@ -3,6 +3,7 @@ package com.itheima.bos.service.base.impl;
 import com.itheima.bos.dao.base.ICourierRepository;
 import com.itheima.bos.domain.base.Courier;
 import com.itheima.bos.service.base.ICourierService;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ public class CourierServiceImpl implements ICourierService{
 
 
     @Override
+    @RequiresPermissions("courier:add")
     public void save(Courier courier) {
         courierRepository.save(courier);
     }

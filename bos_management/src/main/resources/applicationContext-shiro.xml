@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--spring的包扫描-->
+    <context:component-scan base-package="com.itheima.bos.realm"></context:component-scan>
+
+    <!--安全管理器-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="bosRealm"/>
+        <property name="cacheManager" ref="shiroCacheManager"/>
+    </bean>
+
+    <!--配置对那些数据进行缓存-->
+    <bean id="bosRealm" class="com.itheima.bos.realm.BosRealm">
+        <property name="authorizationCacheName" value="bos"/>
+    </bean>
+
+    <bean id="lifecycleBeanPostProcesser" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"></bean>
+
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!--注入安全管理器-->
+        <property name="securityManager" ref="securityManager"/>
+        <!--配置没有认证跳转到那个页面-->
+        <property name="loginUrl" value="/login.html"/>
+        <!--配置认证成功跳转到那个页面-->
+        <property name="successUrl" value="/index.html"/>
+        <!--认证后没有权限的跳转页面-->
+        <property name="unauthorizedUrl" value="/unauthorized.html"/>
+
+        <!--shiro url权限控制的规则-->
+        <property name="filterChainDefinitions">
+            <value>
+                /login.html* = anon
+                /css/** = anon
+                /js/** = anon
+                /images/** = anon
+                /validatecode.jsp* = anon
+                /services/** = anon
+                /user_login.action* = anon
+                /pages/base/courier.html* = perms[courier:list]
+                /pages/base/area.html* = roles[base]
+                /** = authc
+            </value>
+        </property>
+
+
+    </bean>
+
+    <!--开启shiro的注解模式-->
+    <!--配置后处理bean-->
+    <bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator" depends-on="lifecycleBeanPostProcesser">
+        <property name="proxyTargetClass" value="true"></property>
+    </bean>
+
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"></property>
+    </bean>
+
+</beans>

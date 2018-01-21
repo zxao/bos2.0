@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cache="http://www.springframework.org/schema/cache"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+    <!--配置ehcache缓存器-->
+    <bean id="cacheManagerFactory" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <!--注入缓存的配置-->
+        <property name="configLocation" value="classpath:ehcache.xml"/>
+    </bean>
+
+    <!--shiro封装ehcache缓存管理器工厂-->
+    <bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManager" ref="cacheManagerFactory"/>
+    </bean>
+
+
+    <!--spring封装ehcachede 缓存管理器-->
+    <bean id="springCacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager" ref="cacheManagerFactory"/>
+    </bean>
+
+    <!--激活spring缓存注解-->
+    <cache:annotation-driven cache-manager="springCacheManager"/>
+
+
+
+
+</beans>

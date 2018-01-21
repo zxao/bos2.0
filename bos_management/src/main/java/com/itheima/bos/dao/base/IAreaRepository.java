@@ -14,4 +14,6 @@ public interface IAreaRepository extends JpaRepository<Area,String>,JpaSpecifica
     List<String> areaFindCity(String province);
     @Query("select distinct district from Area where province=? and city=?")
     List<String> areaFindDistrictByProvinceAndCity(String province, String city);
+
+    Area findByProvinceAndCityAndDistrict(String province, String city, String district);
 }

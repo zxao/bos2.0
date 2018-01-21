@@ -1,6 +1,7 @@
 package com.itheima.fore.action;
 
 import cn.itcast.crm.domain.Customer;
+import com.itheima.bos.domain.constant.Constants;
 import com.itheima.utils.BaseAction;
 import com.itheima.utils.MailUtils;
 import com.itheima.utils.SmsUtils;
@@ -29,6 +30,7 @@ import javax.print.attribute.standard.Media;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 @Controller
@@ -112,16 +114,28 @@ public class CustomerAction extends BaseAction<Customer>{
         if(checkCodeSession!=null && checkCodeSession.equals(checkCode)){
             //通过验证
             System.out.println("验证码正确！");
+            //调用activeMQ发送邮件
+
             //发送邮件
             //生成短信校验码
             String emailCode = RandomStringUtils.randomNumeric(32);
             //将生成的激活码存入redis数据库,设置生存时间为24小时
             redisTemplate.opsForValue().set(model.getTelephone(),emailCode,24, TimeUnit.HOURS);
             //编写邮件内容String
-            String emailContent="尊敬的客户您好，请在24小时之内完成账户的绑定，绑定账户连接为：<a href="+ MailUtils.activeUrl+"?telephone="+model.getTelephone()+"&emailCode="+emailCode+">请点击这里完成账户绑定</a>";
+            final String emailContent="尊敬的客户您好，请在24小时之内完成账户的绑定，绑定账户连接为：<a href="+ MailUtils.activeUrl+"?telephone="+model.getTelephone()+"&emailCode="+emailCode+">请点击这里完成账户绑定</a>";
             //发送邮件
-            MailUtils.sendMail("这是速运快递的一封激活邮件",emailContent,model.getEmail());
-
+            //MailUtils.sendMail("这是速运快递的一封激活邮件",emailContent,model.getEmail());
+            //调用activeMQ发送邮件
+            jmsTemplate.send("bos_sendEmail", new MessageCreator() {
+                @Override
+                public Message createMessage(Session session) throws JMSException {
+                    MapMessage mapMessage = session.createMapMessage();
+                    mapMessage.setString("description","这是速运快递的一封激活邮件");
+                    mapMessage.setString("emailContent",emailContent);
+                    mapMessage.setString("email",model.getEmail());
+                    return mapMessage;
+                }
+            });
             //保存客户信息
             WebClient.create("http://localhost:9001/crm_management/services/customerService/regist").type(MediaType.APPLICATION_JSON_TYPE).post(model);
             System.out.println("客户注册成功！");
@@ -147,11 +161,18 @@ public class CustomerAction extends BaseAction<Customer>{
         if(this.emailCode !=null && emailCode.equals(emailCodeRedis)){
             //验证成功
             System.out.println("邮箱验证成功");
+            ServletActionContext.getResponse().setContentType("text/html;charset=UTF-8");
+            ServletActionContext.getResponse().setCharacterEncoding("UTF-8");
             Customer customer = WebClient.create("http://localhost:9001/crm_management/services/customerService/customer/findByTelephone/" + model.getTelephone()).accept(MediaType.APPLICATION_JSON_TYPE).type(MediaType.APPLICATION_JSON_TYPE).get(Customer.class);
             if(customer.getType()==null || customer.getType()!=1){
                 //修改type
                 WebClient.create("http://localhost:9001/crm_management/services/customerService/customer/updateTypeByTelephone/" + customer.getTelephone()).accept(MediaType.APPLICATION_JSON_TYPE).put(null);
 
+                try {
+                    ServletActionContext.getResponse().getWriter().write("绑定邮箱成功！");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }else{
                 //已经绑定过邮箱了
                 try {
@@ -168,6 +189,24 @@ public class CustomerAction extends BaseAction<Customer>{
             redisTemplate.delete(model.getTelephone());
         }
         return NONE;
+    }
+
+    @Action(value = "customer_login",results = {@Result(name="success",type="redirect",location ="index.html#/myhome" ),@Result(name="error",type = "redirect",location = "login.html")})
+    public String customerLogin(){
+
+        Customer customer = WebClient.create(Constants.CRM_MANAGEMENT_URL + "/services/customerService/customer/customerLogin?telephone=" + model.getTelephone() + "&password=" + model.getPassword()).accept(MediaType.APPLICATION_JSON_TYPE).type(MediaType.APPLICATION_JSON_TYPE).get(Customer.class);
+        //判断customer是否存在
+        if(customer==null){
+            //不存在，即登录失败
+            return ERROR;
+        }else{
+            //存在，即登录成功
+            //将用户存入session中
+            ServletActionContext.getRequest().getSession().setAttribute("customer",customer);
+            return SUCCESS;
+        }
+
+
     }
 
 

@@ -114,5 +114,10 @@ public class AreaServiceImpl implements IAreaService{
         return areaRepository.areaFindDistrictByProvinceAndCity(province,city);
     }
 
+    @Override
+    public Area findByProvinceAndCityAndDistrict(String province, String city, String district) {
+        return areaRepository.findByProvinceAndCityAndDistrict(province,city,district);
+    }
+
 
 }

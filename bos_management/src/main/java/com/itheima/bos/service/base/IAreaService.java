@@ -59,4 +59,6 @@ public interface IAreaService {
      * @return
      */
     List<String> areaFindDistrictByProvinceAndCity(String province, String city);
+
+    Area findByProvinceAndCityAndDistrict(String province, String city, String district);
 }

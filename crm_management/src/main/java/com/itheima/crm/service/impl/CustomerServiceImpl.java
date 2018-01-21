@@ -62,4 +62,14 @@ public class CustomerServiceImpl implements ICustomerService {
     public void updataTypeByTelephone(String telephone) {
         customerRepository.updataTypeByTelephone(telephone);
     }
+
+    @Override
+    public Customer customerLogin(String telephone, String password) {
+        return customerRepository.findByTelephoneAndPassword(telephone,password);
+    }
+
+    @Override
+    public String findfixedAreaIdByAddress(String address) {
+        return customerRepository.findfixedAreaIdByAddress(address);
+    }
 }

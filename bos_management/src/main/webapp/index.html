@@ -32,7 +32,7 @@
 				};
 				
 				// 基本功能菜单加载
-				$.post("./data/menu.json",function(data){
+				$.post("menu_showMenu.action",function(data){
 					$.fn.zTree.init($("#treeMenu"), setting, data);
 				},"json");
 				
@@ -150,7 +150,7 @@
 				$.messager
 				.confirm('系统提示','您确定要退出本次登录吗?',function(isConfirm) {
 					if (isConfirm) {
-						location.href = './login.html';
+						location.href = './user_logout.action';
 					}
 				});
 			}
